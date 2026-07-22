@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>T. Johnny T. — Illustration</title>
+<meta name="description" content="イラストレーター T. Johnny T.（じょにー）の作品集。">
+<meta property="og:title" content="T. Johnny T. — Illustration">
+<meta property="og:type" content="website">
+<meta property="og:image" content="assets/img/art_04_samurai.webp">
+<style>
+  :root{
+    --bg:#0e1013;
+    --ink:#e8eaec;
+    --muted:#7f878e;
+    --line:#22262b;
+    --cyan:#3fb7b9;
+    --maxw:1400px;
+    --display:"Futura","Century Gothic","Avenir Next","Segoe UI",system-ui,sans-serif;
+    --body:"Noto Sans JP","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);
+    -webkit-font-smoothing:antialiased;overflow-x:hidden}
+  img{max-width:100%;height:auto;display:block}
+  a{color:inherit;text-decoration:none}
+
+  /* ===== 入口 ===== */
+  .intro{min-height:56vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:80px 24px 40px}
+  .intro h1{margin:0;font-family:var(--display);font-weight:800;letter-spacing:.16em;
+    font-size:clamp(20px,4.4vw,44px);white-space:nowrap;
+    opacity:0;transform:translateY(14px);animation:rise 1.1s .15s cubic-bezier(.2,.7,.3,1) forwards}
+  .intro p{margin:16px 0 0;font-size:12px;letter-spacing:.34em;color:var(--muted);
+    opacity:0;animation:fade 1.2s .7s ease forwards}
+  .scroll-cue{margin-top:44px;width:1px;height:56px;background:linear-gradient(var(--muted),transparent);
+    opacity:0;animation:fade 1s 1.3s ease forwards}
+  @keyframes rise{to{opacity:1;transform:none}}
+  @keyframes fade{to{opacity:1}}
+
+  /* ===== ギャラリー ===== */
+  /* 段組みではなくグリッド。横長を全幅で見せるため（column方式では全幅にできない）。
+     行の高さは1pxに刻み、各作品の縦横比からJSで span を計算して敷き詰める。 */
+  /* 横の間隔と縦の間隔はここが正。JSも同じ値を読んで行数を計算する */
+  .gallery{--col-gap:20px;--row-gap:46px;
+    max-width:var(--maxw);margin:0 auto;padding:0 20px 90px;
+    display:grid;grid-template-columns:repeat(3,1fr);
+    column-gap:var(--col-gap);row-gap:0;grid-auto-rows:1px}
+  @media(max-width:1000px){.gallery{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:600px){.gallery{grid-template-columns:1fr;padding-bottom:60px}}
+
+  /* 横長は1行を占有して大きく見せる。幅はここが正で、JSもこの値を読んで行数を計算する */
+  .gallery{--wide-w:70%}
+  .art.wide{grid-column:1 / -1;width:var(--wide-w);margin-left:auto;margin-right:auto}
+
+  /* 縦の間隔はJSが span に含めて確保する。ここで margin を足すと二重になる。
+     align-self:start が無いと確保した分だけ枠が伸び、画像の下に背景色の帯が出る */
+  .art{margin:0;align-self:start;position:relative;cursor:zoom-in;
+    border-radius:6px;overflow:hidden;background:#15181c;
+    opacity:0;transform:translateY(26px) scale(.985);
+    transition:opacity .85s cubic-bezier(.2,.7,.3,1), transform .85s cubic-bezier(.2,.7,.3,1)}
+  .art.in{opacity:1;transform:none}
+  .art img{width:100%;transition:transform .7s cubic-bezier(.2,.7,.3,1), filter .5s ease}
+  .art:hover img{transform:scale(1.045)}
+  .art::after{content:"";position:absolute;inset:0;background:rgba(14,16,19,.28);
+    opacity:1;transition:opacity .5s ease;pointer-events:none}
+  .art:hover::after{opacity:0}
+
+  /* ===== 拡大表示 ===== */
+  .viewer{position:fixed;inset:0;z-index:50;display:none;
+    background:rgba(8,9,11,.96);backdrop-filter:blur(6px);
+    align-items:center;justify-content:center;padding:56px 72px}
+  .viewer.open{display:flex;animation:fade .3s ease forwards;opacity:0}
+  .viewer img{max-width:100%;max-height:calc(100vh - 112px);object-fit:contain;
+    border-radius:4px;box-shadow:0 30px 90px rgba(0,0,0,.6)}
+  .viewer img.swap{animation:swapIn .45s cubic-bezier(.2,.7,.3,1)}
+  @keyframes swapIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
+  .vbtn{position:absolute;background:none;border:0;color:var(--ink);cursor:pointer;
+    font-size:30px;line-height:1;padding:14px;opacity:.55;transition:opacity .2s}
+  .vbtn:hover{opacity:1}
+  .vprev{left:8px;top:50%;transform:translateY(-50%)}
+  .vnext{right:8px;top:50%;transform:translateY(-50%)}
+  .vclose{top:10px;right:12px;font-size:26px}
+  .vcount{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);
+    font-family:var(--display);font-size:12px;letter-spacing:.18em;color:var(--muted)}
+  @media(max-width:600px){
+    .viewer{padding:52px 12px}
+    .vbtn{font-size:24px}
+  }
+
+  /* ===== フッター ===== */
+  footer{border-top:1px solid var(--line);padding:30px 24px 40px;text-align:center}
+  .ft-links{display:flex;gap:22px;justify-content:center;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+  .ft-links a{border-bottom:1px solid transparent;transition:.2s}
+  .ft-links a:hover{color:var(--cyan);border-color:var(--cyan)}
+  .ft-copy{margin:16px 0 0;font-size:11.5px;letter-spacing:.06em;color:#5c646b}
+
+  /* 省モーション設定の人には動きを出さない（表示自体は保つ） */
+  @media (prefers-reduced-motion: reduce){
+    .intro h1,.intro p,.scroll-cue{animation:none;opacity:1;transform:none}
+    .art{opacity:1;transform:none;transition:none}
+    .art img{transition:none}
+    .art:hover img{transform:none}
+    .viewer.open{animation:none;opacity:1}
+    .viewer img.swap{animation:none}
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body>
+
+<section class="intro">
+  <h1>T. JOHNNY T.</h1>
+  <p>ILLUSTRATION</p>
+  <div class="scroll-cue"></div>
+</section>
+
+<main class="gallery" id="gallery">
+  <figure class="art"><img src="assets/img/art_04_samurai.webp" width="1600" height="1600" alt=""></figure>
+  <figure class="art"><img src="assets/img/art_16_house.webp" width="1600" height="2266" alt=""></figure>
+  <figure class="art"><img src="assets/img/art_10_chihuahua.webp" width="1600" height="1600" alt=""></figure>
+  <figure class="art"><img src="assets/img/art_28_mc_nina.webp" width="640" height="960" alt="" loading="lazy"></figure>
+  <figure class="art"><img src="assets/img/art_01_bird.webp" width="1500" height="1500" alt="" loading="lazy"></figure>
+  <figure class="art"><img src="assets/img/art_19_skull_bee.webp" width="1600" height="2133" alt="" loading="lazy"></figure>
+  <figure class="art"><img src="assets/img/art_13_worker_a.webp" width="1600" height="1600" alt="" loading="lazy"></figure>
+  <figure class="art"><img src="assets/img/art_27_popper_title.webp" width="640" height="960" alt="" loading="lazy"></figure>
+  <figure class="art"><img src="assets/img/art_05_obachan_a.webp" width="1600" height="1600" alt="" loading="lazy"></figure>
+  <figure class="art"><img src="assets/img/art_22_okinawa_dog.webp" width="1600" height="2133" alt="" loading="lazy"></figure>
+  <figure class="art"><img src="assets/img/art_12_ninja_biker.webp" width="1600" height="1600" alt="" loading="lazy"></figure>
+  <figure class="art"><img src="assets/img/art_29_mc_zir.webp" width="640" height="960" alt="" loading="lazy"></figure>
+  <figure class="art"><img src="assets/img/art_18_qtaro.webp" width="1600" height="1600" alt="" loading="lazy"></figure>
+  <figure class="art"><img src="assets/img/art_21_painter.webp" width="1600" height="2216" alt="" loading="lazy"></figure>
+  <figure class="art"><img src="assets/img/art_02_outdrive_a.webp" width="1600" height="1600" alt="" loading="lazy"></figure>
+  <figure class="art"><img src="assets/img/art_30_mc_gorock.webp" width="640" height="960" alt="" loading="lazy"></figure>
+  <figure class="art"><img src="assets/img/art_17_ice_cream.webp" width="1600" height="1600" alt="" loading="lazy"></figure>
+  <figure class="art"><img src="assets/img/art_08_stop_a.webp" width="1600" height="1600" alt="" loading="lazy"></figure>
+  <figure class="art"><img src="assets/img/art_20_tanuki.webp" width="1500" height="1500" alt="" loading="lazy"></figure>
+  <figure class="art"><img src="assets/img/art_14_worker_b.webp" width="1600" height="1600" alt="" loading="lazy"></figure>
+  <figure class="art"><img src="assets/img/art_06_obachan_b.webp" width="1600" height="1600" alt="" loading="lazy"></figure>
+  <figure class="art"><img src="assets/img/art_11_giraffe.webp" width="1600" height="1600" alt="" loading="lazy"></figure>
+  <figure class="art"><img src="assets/img/art_03_outdrive_b.webp" width="1600" height="1600" alt="" loading="lazy"></figure>
+  <figure class="art"><img src="assets/img/art_09_stop_b.webp" width="1600" height="1600" alt="" loading="lazy"></figure>
+  <figure class="art"><img src="assets/img/art_07_illust13.webp" width="1600" height="1600" alt="" loading="lazy"></figure>
+  <figure class="art"><img src="assets/img/art_15_worker_c.webp" width="1600" height="1600" alt="" loading="lazy"></figure>
+
+  <!-- 横長は最後にまとめる。途中に挟むと行が分断され、上に隙間が空くため -->
+  <figure class="art wide"><img src="assets/img/art_23_sb_bg1.webp" width="1600" height="900" alt="" loading="lazy"></figure>
+  <figure class="art wide"><img src="assets/img/art_24_sb_bg2.webp" width="1600" height="900" alt="" loading="lazy"></figure>
+  <figure class="art wide"><img src="assets/img/art_25_sb_bg3.webp" width="1600" height="900" alt="" loading="lazy"></figure>
+  <figure class="art wide"><img src="assets/img/art_26_sb_bg4.webp" width="1600" height="900" alt="" loading="lazy"></figure>
+</main>
+
+<div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="拡大表示">
+  <button class="vbtn vclose" id="vclose" aria-label="閉じる">✕</button>
+  <button class="vbtn vprev" id="vprev" aria-label="前の作品">‹</button>
+  <img id="vimg" src="" alt="">
+  <button class="vbtn vnext" id="vnext" aria-label="次の作品">›</button>
+  <span class="vcount" id="vcount"></span>
+</div>
+
+<footer>
+  <div class="ft-links">
+    <a href="https://rollplayingcomics.com" target="_blank" rel="noopener">THE ROLLPLAYING COMICS</a>
+    <a href="https://tak-johnny-t.github.io/my-portfolio/" target="_blank" rel="noopener">シナリオライティング</a>
+  </div>
+  <p class="ft-copy">© 2026 T. Johnny T.</p>
+</footer>
+
+<script>
+  // ===== 敷き詰めレイアウト =====
+  // grid-auto-rows:1px の上で、縦横比から必要な行数を出して span させる。
+  // 画像の読み込みを待たずに済むよう、寸法は width/height 属性から取る。
+  (function(){
+    var gallery = document.getElementById('gallery');
+    var arts = [].slice.call(gallery.querySelectorAll('.art'));
+
+    function layout(){
+      var cs = getComputedStyle(gallery);
+      var cols = cs.gridTemplateColumns.split(' ').length;
+      var inner = gallery.clientWidth
+        - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      // 間隔と横長の幅はCSS側の変数が正。ここで読んで行数の計算に使う
+      var colGap  = parseFloat(cs.getPropertyValue('--col-gap')) || 20;
+      var rowGap  = parseFloat(cs.getPropertyValue('--row-gap')) || 20;
+      var widePct = parseFloat(cs.getPropertyValue('--wide-w'))  || 100;
+      var colW = (inner - colGap * (cols - 1)) / cols;
+
+      arts.forEach(function(a){
+        var img = a.querySelector('img');
+        var w = parseFloat(img.getAttribute('width'));
+        var h = parseFloat(img.getAttribute('height'));
+        if (!w || !h) return;
+        var full = a.classList.contains('wide') && cols > 1;
+        var boxW = full ? inner * widePct / 100 : colW;
+        a.style.gridRowEnd = 'span ' + Math.ceil(boxW * h / w + rowGap);
+      });
+    }
+
+    layout();
+    var t;
+    window.addEventListener('resize', function(){
+      clearTimeout(t);
+      t = setTimeout(layout, 120);
+    });
+    window.addEventListener('load', layout);
+  })();
+
+  // ===== スクロールで下から現れる =====
+  (function(){
+    var arts = [].slice.call(document.querySelectorAll('.art'));
+    if (!('IntersectionObserver' in window)) {
+      arts.forEach(function(a){ a.classList.add('in') });
+      return;
+    }
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (!e.isIntersecting) return;
+        // 段組みで横に並んだものが同時に出ると単調なので、少しずらす
+        var d = (arts.indexOf(e.target) % 3) * 90;
+        setTimeout(function(){ e.target.classList.add('in') }, d);
+        io.unobserve(e.target);
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+    arts.forEach(function(a){ io.observe(a) });
+  })();
+
+  // ===== 拡大表示 =====
+  (function(){
+    var arts   = [].slice.call(document.querySelectorAll('.art img'));
+    var viewer = document.getElementById('viewer');
+    var vimg   = document.getElementById('vimg');
+    var vcount = document.getElementById('vcount');
+    var idx = 0;
+    var lastY = 0;
+
+    function show(i, animate){
+      idx = (i + arts.length) % arts.length;
+      vimg.src = arts[idx].getAttribute('src');
+      vcount.textContent = (idx + 1) + ' / ' + arts.length;
+      if (animate) {
+        vimg.classList.remove('swap');
+        void vimg.offsetWidth;      // アニメーションを再生し直すため
+        vimg.classList.add('swap');
+      }
+    }
+    function open(i){
+      lastY = window.scrollY;       // 閉じたときに元の位置へ戻す
+      show(i, false);
+      viewer.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function close(){
+      viewer.classList.remove('open');
+      document.body.style.overflow = '';
+      // scroll-behavior:smooth が効くと復帰がアニメーションしてズレるので、ここだけ即時に戻す
+      window.scrollTo({ top: lastY, behavior: 'instant' });
+    }
+
+    arts.forEach(function(im, i){
+      im.parentNode.addEventListener('click', function(){ open(i) });
+    });
+    document.getElementById('vclose').addEventListener('click', close);
+    document.getElementById('vprev').addEventListener('click', function(e){ e.stopPropagation(); show(idx - 1, true) });
+    document.getElementById('vnext').addEventListener('click', function(e){ e.stopPropagation(); show(idx + 1, true) });
+    viewer.addEventListener('click', function(e){ if (e.target === viewer) close() });
+
+    document.addEventListener('keydown', function(e){
+      if (!viewer.classList.contains('open')) return;
+      if (e.key === 'Escape') close();
+      else if (e.key === 'ArrowRight') show(idx + 1, true);
+      else if (e.key === 'ArrowLeft')  show(idx - 1, true);
+    });
+
+    // スマホのスワイプ送り
+    var x0 = null;
+    viewer.addEventListener('touchstart', function(e){ x0 = e.touches[0].clientX }, {passive:true});
+    viewer.addEventListener('touchend', function(e){
+      if (x0 === null) return;
+      var dx = e.changedTouches[0].clientX - x0;
+      if (Math.abs(dx) > 50) show(idx + (dx < 0 ? 1 : -1), true);
+      x0 = null;
+    }, {passive:true});
+  })();
+</script>
+
+</body>
+</html>
