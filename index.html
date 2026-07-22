@@ -48,11 +48,16 @@
     display:grid;grid-template-columns:repeat(3,1fr);
     column-gap:var(--col-gap);row-gap:0;grid-auto-rows:1px}
   @media(max-width:1000px){.gallery{grid-template-columns:repeat(2,1fr)}}
-  @media(max-width:600px){.gallery{grid-template-columns:1fr;padding-bottom:60px}}
 
   /* 横長は1行を占有して大きく見せる。幅はここが正で、JSもこの値を読んで行数を計算する */
   .gallery{--wide-w:70%}
   .art.wide{grid-column:1 / -1;width:var(--wide-w);margin-left:auto;margin-right:auto}
+
+  /* スマホ。1列だと縦スクロールが長すぎるので2列のまま詰める。
+     間隔と横長幅もここで上書きする（--wide-w の初期値より後に書く必要がある） */
+  @media(max-width:600px){
+    .gallery{--col-gap:12px;--row-gap:26px;--wide-w:100%;padding:0 14px 60px}
+  }
 
   /* 縦の間隔はJSが span に含めて確保する。ここで margin を足すと二重になる。
      align-self:start が無いと確保した分だけ枠が伸び、画像の下に背景色の帯が出る */
@@ -66,6 +71,8 @@
   .art::after{content:"";position:absolute;inset:0;background:rgba(14,16,19,.28);
     opacity:1;transition:opacity .5s ease;pointer-events:none}
   .art:hover::after{opacity:0}
+  /* タッチ端末はhoverが無く、暗いままになってしまうので最初から掛けない */
+  @media(hover:none){.art::after{opacity:0}}
 
   /* ===== 拡大表示 ===== */
   .viewer{position:fixed;inset:0;z-index:50;display:none;
